@@ -27,9 +27,12 @@ class CoinbaseWalletAuth(AuthBase):
     # return auth request
     def __call__(self, request):
         timestamp = str(int(time.time()))
+        # prehash string (message) : timestamp + method + requestPath + body
         message = timestamp + request.method + request.path_url + (request.body or '')
+        # convert to bytes, expected format for hmac
         keyBytes = bytes(self.secretKey, 'latin-1') # string to bytes
         messageBytes = bytes(message, 'latin-1') # string to bytes
+        # sign using secret key and prehash string (message)
         signature = hmac.new(keyBytes, messageBytes, hashlib.sha256).hexdigest()
         
         request.headers.update({
