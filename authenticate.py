@@ -18,7 +18,6 @@ def loadEnvironmentVariables():
     print(API_SECRET)
     print('Authenticating...')
     
-
 # custom authentication for Coinbase API
 class CoinbaseWalletAuth(AuthBase):
     # load api key and secret key
@@ -40,8 +39,6 @@ class CoinbaseWalletAuth(AuthBase):
         })
         return request
 
-
-
 apiUrl = 'https://api.coinbase.com/v2/'
 loadEnvironmentVariables()
 auth = CoinbaseWalletAuth(API_KEY, API_SECRET)
@@ -49,5 +46,3 @@ auth = CoinbaseWalletAuth(API_KEY, API_SECRET)
 # get current user
 r = requests.get(apiUrl + 'user', auth=auth)
 print (r.json()) # print {u'data'}
-
-
