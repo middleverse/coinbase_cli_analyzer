@@ -42,10 +42,31 @@ class CoinbaseWalletAuth(AuthBase):
         })
         return request
 
-apiUrl = 'https://api.coinbase.com/v2/'
-loadEnvironmentVariables()
-auth = CoinbaseWalletAuth(API_KEY, API_SECRET)
+def authenticate():
+    apiUrl = 'https://api.coinbase.com/v2/'
+    loadEnvironmentVariables()
+    auth = CoinbaseWalletAuth(API_KEY, API_SECRET)
 
-# get current user
-r = requests.get(apiUrl + 'user', auth=auth)
-print (r.json()) # print {u'data'}
+    # get current user
+    r = requests.get(apiUrl + 'accounts', auth=auth)
+    loaded_json = r.json()
+    print(loaded_json['data'][20])
+
+    accountIds = []
+    accountNames = []
+    for x in loaded_json['data']:
+        if x['updated_at'] != None:
+            accountIds.append(x['id'])
+            accountNames.append(x['name'])
+
+    for acc in range(len(accountIds)):
+        print('====')
+        print(accountIds[acc])
+        print(accountNames[acc])
+
+
+def main():
+    authenticate()
+
+if __name__ == '__main__':
+    main()
