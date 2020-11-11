@@ -44,6 +44,7 @@ class CoinbaseWalletAuth(AuthBase):
         })
         return request
 
+# TODO: ADD SSL encryption
 def authenticate():
     load_environment_variables()
     auth = CoinbaseWalletAuth(API_KEY, API_SECRET)
@@ -53,53 +54,13 @@ def authenticate():
     #     print(accountIds[acc])
     #     print(accountNames[acc])
     return auth
-
-# return client name, email
-def getClientProfile(auth):
-    r = requests.get(API_URL + 'user', auth=auth)
-    data = r.json()['data']
-
-    print("User Name: %s" % data['name'])
-    print("User Email: %s" % data['email']) 
-
-def getAllClientAccounts(auth):
-    r = requests.get(API_URL + 'accounts', auth=auth)
-    data = r.json()['data']
-    accountIds = []
-    accountNames = []
-    for acc in data:
-        if acc['updated_at'] != None:
-            accountIds.append(acc['id'])
-            accountNames.append(acc['name'])
-            print(acc['id'])
-            print(acc['name'])
-            print()
-    print('All accounts listed!')
-
-def getClientAccount(acc_id, auth):
-    r = requests.get(API_URL + 'accounts/' + acc_id, auth=auth)
-    data = r.json()['data']
-    acc = data[0] # TODO: create logic here, currently hardwired to first account
-    print('Currency: ' + acc['currency'])
-    print('Balance: ' + acc['balance']['amount'])
-
-# return accounts with balance
-def getClientPortfolio(auth):
-    r = requests.get(API_URL + 'accounts', auth=auth)
-    data = r.json()['data']
-    for acc in data:
-        if float(acc['balance']['amount']) > 0:
-            print('Currency: %s' % acc['balance']['currency'])
-            print('Native Balance: %s' % acc['balance']['amount'])
-            # TODO: Add USD balance
-            print()
-    print('All accounts listed!')
     
 def main():
     auth = authenticate()
     #getClientProfile(auth)    
     # getAllClientAccounts(auth)
-    getClientPortfolio(auth)
+    # getClientPortfolio(auth)
+    # getClientAccount('ETH', auth)
 
 if __name__ == '__main__':
     main()
