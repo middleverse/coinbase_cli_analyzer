@@ -8,8 +8,8 @@
 import json, hmac, hashlib, time, requests, sys
 from requests.auth import AuthBase
 
-API_KEY = ''
-API_SECRET = ''
+API_KEY = 'qVBekOChVfjgMEvS'
+API_SECRET = 'TlO0IJbw0wFpOa3NeeT9wJJJU6Wx0nkO'
 API_URL = 'https://api.coinbase.com/v2/'
 
 def load_environment_variables():
@@ -59,14 +59,17 @@ def authenticate():
     r = requests.get(API_URL + 'user', auth=auth)
     
     # if authentication was unsucessful, exit system
-    if r.json()['errors'] != None:
+    if 'errors' in r.json():
         print('Authentication unsuccesful. Check credentials.')
         sys.exit()
 
     # print user name and email    
     data = r.json()['data']
     print('Authentication successful.')
+    print()
     print("User Name: %s" % data['name'])
-    print("User Email: %s" % data['email']) 
+    print("User Email: %s" % data['email'])
+    print()
+    print("Check README for usage instructions. Type \"q\" to end session.") 
     
     return auth
