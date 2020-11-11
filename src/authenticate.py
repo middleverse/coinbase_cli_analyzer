@@ -5,7 +5,7 @@
 # 'hmac' for MAC (signing) functionality
 # 'hashlib' for sha256 (hash) functionality
 # 'requests' for HTTP access
-import json, hmac, hashlib, time, requests
+import json, hmac, hashlib, time, requests, sys
 from requests.auth import AuthBase
 
 API_KEY = ''
@@ -18,7 +18,6 @@ def load_environment_variables():
     # # API_SECRET = input('Enter API SECRET: ')
     # print(API_SECRET)
     print('Authenticating...')
-    print()
     
 # custom authentication for Coinbase API
 class CoinbaseWalletAuth(AuthBase):
@@ -26,17 +25,22 @@ class CoinbaseWalletAuth(AuthBase):
     def __init__(self, apiKey, secretKey):
         self.apiKey = apiKey
         self.secretKey = secretKey
+
     # return auth request
     def __call__(self, request):
         timestamp = str(int(time.time()))
+        
         # prehash string (message) : timestamp + method + requestPath + body
         message = timestamp + request.method + request.path_url + (request.body or '')
+        
         # convert to bytes, expected format for hmac
         keyBytes = bytes(self.secretKey, 'latin-1') # string to bytes
         messageBytes = bytes(message, 'latin-1') # string to bytes
+        
         # sign using secret key and prehash string (message)
         signature = hmac.new(keyBytes, messageBytes, hashlib.sha256).hexdigest()
         
+        # create headers expected by coinbase API (refer to coinbase documentation for syntax)
         request.headers.update({
             'CB-ACCESS-SIGN': signature,
             'CB-ACCESS-TIMESTAMP': timestamp,
@@ -47,20 +51,22 @@ class CoinbaseWalletAuth(AuthBase):
 # TODO: ADD SSL encryption
 def authenticate():
     load_environment_variables()
+    
+    # create auth object for endpoint requests
     auth = CoinbaseWalletAuth(API_KEY, API_SECRET)
     
-    # for acc in range(len(accountIds)):
-    #     print('====')
-    #     print(accountIds[acc])
-    #     print(accountNames[acc])
-    return auth
+    # get account data
+    r = requests.get(API_URL + 'user', auth=auth)
     
-def main():
-    auth = authenticate()
-    #getClientProfile(auth)    
-    # getAllClientAccounts(auth)
-    # getClientPortfolio(auth)
-    # getClientAccount('ETH', auth)
+    # if authentication was unsucessful, exit system
+    if r.json()['errors'] != None:
+        print('Authentication unsuccesful. Check credentials.')
+        sys.exit()
 
-if __name__ == '__main__':
-    main()
+    # print user name and email    
+    data = r.json()['data']
+    print('Authentication successful.')
+    print("User Name: %s" % data['name'])
+    print("User Email: %s" % data['email']) 
+    
+    return auth
