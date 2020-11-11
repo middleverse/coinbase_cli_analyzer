@@ -8,8 +8,8 @@
 import json, hmac, hashlib, time, requests, sys
 from requests.auth import AuthBase
 
-API_KEY = 'qVBekOChVfjgMEvS'
-API_SECRET = 'TlO0IJbw0wFpOa3NeeT9wJJJU6Wx0nkO'
+API_KEY = ''
+API_SECRET = ''
 API_URL = 'https://api.coinbase.com/v2/'
 
 def load_environment_variables():
