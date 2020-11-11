@@ -1,7 +1,8 @@
 import sys
+from authenticate import authenticate
+import model
 
 EXIT_MARKERS = {'q', 'quit'}
-
 
 def findCurrency(currency):
     return 1
@@ -23,30 +24,38 @@ def displayStats(args):
             print('Currency stats not found. Try another currency.')
             return 0
         
-
 # returns stats for all currently held portfolio
 def getPortfolioStats(args):
     return 1
 
-
-
+# handles user input and delegation of requests
 def controller():
+    # initiate authentication
+    # get an auth object in return
+    auth = authenticate()
+
+    # if program doesn't exit during authentication,
+    # initiate user input
     command = ''
     while(command.upper() not in EXIT_MARKERS):
-        command = input('>')
+        command = input('> ') or 'empty'
         args = []
 
-        # read all arugments
+        # parse user input into readable commands
         for arg in command.split():
             args.append(arg.lower())
         
+        # CHECK FOR HIGH LEVEL INPUT TYPES (exit request, empty or valid input)
         # if user wants to quit program
-        if arg[0] in EXIT_MARKERS:
+        if args[0] in EXIT_MARKERS:
             print('Ending Sesson...')
             sys.exit()
-        
-        displayStats(args)
-        
+        # if input is empty
+        elif args[0] == 'empty':
+            print('No input entered... Check README file for usage instructions.')       
+        # all other inputs (checked for validity later)
+        else:
+            displayStats(args)        
 
 def main():
     controller()
