@@ -12,7 +12,7 @@ from requests import auth
 
 API_URL = 'https://api.coinbase.com/v2/'
 API_ENDPOINTS = {
-    'price' : 'prices/%s/spot', # %s is currency_pair, ex: 'btc_cad'
+    'price' : 'prices/%s-usd/spot', # %s is currency_pair, ex: 'btc_cad'
     'transactions' : 'accounts/%s/transactions', # %s is account id
     'buys' : 'accounts/%s/buys', # %s is account id
     'sells' : 'accounts/:account_id/sells', # %s is account id
@@ -63,19 +63,19 @@ class AccountModel():
                 return
 
         # use second argument to route user request
-        if args[1] == 'price':
+        if args[1] == 'PRICE':
             self.displaySpotPrice()
-        elif args[1] == 'owned':
+        elif args[1] == 'OWNED':
             self.displayOwned()
-        elif args[1] == 'transactions':
+        elif args[1] == 'TRANSACTIONS':
             self.displayTransactions()
-        elif args[1] == 'buys':
+        elif args[1] == 'BUYS':
             self.displayBuys()
-        elif args[1] == 'sells':
+        elif args[1] == 'SELLS':
             self.displaySells()
-        elif args[1] == 'profit':
+        elif args[1] == 'PROFIT':
             self.displayProfit()
-        elif args[1] == 'balance':
+        elif args[1] == 'BALANCE':
             self.displayBalance()
         else: # TODO: move this to controller
             print('No query (second argument) provided for currency, please provide a valid argument.')
@@ -91,10 +91,20 @@ class AccountModel():
             r = requests.get(API_URL + 'prices/%s-usd/spot' % (currency), auth=self.auth)
             data = r.json()['data']
             print('%s: %s USD' % (currency, data['amount']))
-        return 1
 
-    def displayTransactions():
-        return 1
+    def displayTransactions(self):
+        self.queryTitlePrinter('TRANSACTIONS PER CURRENCY:')
+        for currency in self.query_currencies:
+            print(currency)
+            r = requests.get(API_URL + 'accounts/%s/transactions' % (currency), auth=self.auth)
+            data = r.json()['data']
+            for transaction in data:
+                if transaction['type'].lower() != 'buy' and transaction['type'].lower() != 'sell':
+                    continue
+                print('Type: ' + transaction['type'].upper())
+                print('Amount: %s %s' % (transaction['amount']['amount'], currency))
+                print('Status: ' + transaction['status'])
+                print('-----')
 
     def displayBuys():
         return 1
