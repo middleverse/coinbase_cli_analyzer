@@ -12,7 +12,7 @@ from requests import auth
 
 API_URL = 'https://api.coinbase.com/v2/'
 API_ENDPOINTS = {
-    'price' : 'prices/%s-usd/spot', # %s is currency_pair, ex: 'btc_cad'
+    'prices' : 'prices/%s-usd/spot', # %s is currency_pair, ex: 'btc_cad'
     'transactions' : 'accounts/%s/transactions', # %s is account id
     'buys' : 'accounts/%s/buys', # %s is account id
     'sells' : 'accounts/:account_id/sells', # %s is account id
@@ -48,11 +48,11 @@ class AccountModel():
         # 'all': display stats for all currencies owned at any time
         # 'curr': display stats for currencies owned currently
         # 'btc': display stats for currency name provided, ex: 'btc'
-        
-        # build a list of currencies to fetch data for
-        if args[0] == 'all':
+        self.query_currencies.clear()
+        # figure out which currencies to display data for
+        if args[0] == 'ALL':
             self.query_currencies = self.currencies_all.keys()
-        elif args[0] == 'curr':
+        elif args[0] == 'CURR':
             self.query_currencies = self.currencies_current.keys()
         else:   
             # user own(s/ed) this currency
@@ -84,6 +84,7 @@ class AccountModel():
         self.queryTitlePrinter('CURRENCIES OWNED:')
         for currency in self.query_currencies:
             print(currency)
+            print()
 
     def displaySpotPrice(self):
         self.queryTitlePrinter('CURRENT PRICE FOR 1 UNIT OF:')
@@ -91,6 +92,7 @@ class AccountModel():
             r = requests.get(API_URL + 'prices/%s-usd/spot' % (currency), auth=self.auth)
             data = r.json()['data']
             print('%s: %s USD' % (currency, data['amount']))
+            print()
 
     def displayTransactions(self):
         self.queryTitlePrinter('TRANSACTIONS PER CURRENCY:')
@@ -102,26 +104,51 @@ class AccountModel():
                 if transaction['type'].lower() != 'buy' and transaction['type'].lower() != 'sell':
                     continue
                 print('Type: ' + transaction['type'].upper())
-                print('Amount: %s %s' % (transaction['amount']['amount'], currency))
+                print('Amount: %s %s' % (transaction['amount']['amount'], currency)) # TODO: didn't endpoint return in USD? Check again
                 print('Status: ' + transaction['status'])
+                print('Time: ' + transaction['updated_at'])
                 print('-----')
+            print()
 
-    def displayBuys():
+    def displayBuys(self):
+        self.queryTitlePrinter('BUYS PER CURRENCY:')
+        for currency in self.query_currencies:
+            print(currency)
+            r = requests.get(API_URL + 'accounts/%s/buys' % (currency), auth=self.auth)
+            data = r.json()['data']
+            for transaction in data:
+                print('Type : BUY')
+                print('Currency Amount: %s %s' % (transaction['amount']['amount'], currency))
+                print('Native Amount: %s %s' % (transaction['subtotal']['amount'], transaction['subtotal']['currency']))
+                print('Native Fee Amount: %s %s' % (transaction['fee']['amount'], transaction['fee']['currency']))
+                print('Status: ' + transaction['status'])
+                print('Time: ' + transaction['updated_at']) 
+                print('-----')
+            print()
+
+    def displaySells(self):
+        self.queryTitlePrinter('SELLS PER CURRENCY:')
+        for currency in self.query_currencies:
+            print(currency)
+            r = requests.get(API_URL + 'accounts/%s/sells' % (currency), auth=self.auth)
+            data = r.json()['data']
+            for transaction in data:
+                print('Type : SELL')
+                print('Currency Amount: %s %s' % (transaction['amount']['amount'], currency))
+                print('Native Amount: %s %s' % (transaction['subtotal']['amount'], transaction['subtotal']['currency']))
+                print('Native Fee Amount: %s %s' % (transaction['fee']['amount'], transaction['fee']['currency']))
+                print('Status: ' + transaction['status'])
+                print('Time: ' + transaction['updated_at']) 
+                print('-----')
+            print()
+
+    def displayProfit(self):
         return 1
 
-    def displaySells():
-        return 1
-
-    def displayProfit():
-        return 1
-
-    def displayBalance():
+    def displayBalance(self):
         return 1
 
     def queryTitlePrinter(self, str):
         print('============================')
         print(str)
         print('----------------------------')
-# TODO:
-# FINISH DISPLAY STATS ROUTING
-# CREATE QUERY FUNCTIONS
