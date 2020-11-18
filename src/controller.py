@@ -2,7 +2,7 @@ import sys
 from authenticate import authenticate
 from model import AccountModel 
 
-EXIT_MARKERS = {'q', 'quit'}
+EXIT_MARKERS = {'Q', 'QUIT'}
       
 # handles user input and delegation of requests
 def controller():
@@ -12,18 +12,18 @@ def controller():
 
     # create model
     m = AccountModel(auth)
-    m.buildModel() # TODO: make this an inherent model call?
     
     # if program doesn't exit during authentication,
     # initiate user input
     command = ''
     while(command.upper() not in EXIT_MARKERS):
-        command = input('> ') or 'empty'
+        command = input('> ') or 'EMPTY_STRING'
+        print()
         args = []
 
         # parse user input into readable commands
         for arg in command.split():
-            args.append(arg.lower())
+            args.append(arg.upper())
         
         # CHECK FOR HIGH LEVEL INPUT TYPES (exit request, empty or valid input)
         # if user wants to quit program
@@ -31,11 +31,12 @@ def controller():
             print('Ending Sesson...')
             sys.exit()
         # if input is empty
-        elif args[0] == 'empty':
+        elif args[0] == 'EMPTY_STRING':
             print('No input entered... Check README file for usage instructions.')       
         # all other inputs (checked for validity later) 
         else:
-            m.displayStats(args)      
+            m.displayStats(args)   
+        print()   
 
 def main():
     controller()
