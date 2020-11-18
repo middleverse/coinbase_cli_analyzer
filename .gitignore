@@ -2,3 +2,8 @@ fire.txt
 .gitsecret/keys/random_seed
 todo.txt
 water.txt
+.gitsecret/
+.vscode/
+public-key.gpg
+water.txt.secret
+my-priv-gpg-key.asc
