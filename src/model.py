@@ -25,7 +25,9 @@ class AccountModel():
         self.auth = auth
         self.currencies_all = {}
         self.currencies_current = {}
+        self.currencies_previously_held = {}
         self.query_currencies = []
+        self.native_currency = ''
         self.isUSD = False
         self.isPCT = False
         self.buildModel()
@@ -41,6 +43,12 @@ class AccountModel():
                 self.currencies_all[acc['currency']['code']] = None
                 if float(acc['balance']['amount']) > 0: # if currency owned currently
                     self.currencies_current[acc['currency']['code']] = None
+                else: # currency previously held
+                    self.currencies_previously_held[acc['currency']['code']] = None
+
+        r = requests.get(API_URL + 'user', auth=self.auth)
+        data = r.json()['data']
+        self.native_currency = data['native_currency']
         print('User data loaded.')
     
     def displayStats(self, args):
@@ -48,12 +56,12 @@ class AccountModel():
         # 'all': display stats for all currencies owned at any time
         # 'curr': display stats for currencies owned currently
         # 'btc': display stats for currency name provided, ex: 'btc'
-        self.query_currencies.clear()
+        self.query_currencies = []
         # figure out which currencies to display data for
         if args[0] == 'ALL':
-            self.query_currencies = self.currencies_all.keys()
+            self.query_currencies = list(self.currencies_all.keys())
         elif args[0] == 'CURR':
-            self.query_currencies = self.currencies_current.keys()
+            self.query_currencies = list(self.currencies_current.keys())
         else:   
             # user own(s/ed) this currency
             if args[0] in self.currencies_all:
@@ -74,7 +82,10 @@ class AccountModel():
         elif args[1] == 'SELLS':
             self.displaySells()
         elif args[1] == 'PROFIT':
-            self.displayProfit()
+            if args[0] == 'CURR' or args[0] in self.currencies_current:
+                print('Profits can only be displayed for previously held currencies!')
+            else:
+                self.displayProfit()
         elif args[1] == 'BALANCE':
             self.displayBalance()
         else: # TODO: move this to controller
@@ -143,10 +154,41 @@ class AccountModel():
             print()
 
     def displayProfit(self):
-        return 1
+        self.queryTitlePrinter('PROFITS: ')
+        print('>> NOTE: Profits are only displayed for previously held currencies.\n')
+        profit_queries = []
+        global_net = 0
+        if len(self.query_currencies) == 1: # print profit for one currency
+            profit_queries = self.query_currencies
+        else:
+            profit_queries = self.currencies_previously_held
+            # print profit for all currencies (prev held)          
+            # for each currency that has been bought and sold and doesn't have a balance
+            # hence any currency that isn't in the current portfolio
+            # -> print a profit/loss statement
+            # keep a total tally of these profits/losses
+            # -> print a totals statement at the end
+            # NOTE: we can't print profits for currencies with balance since 
+            # there can be multiple positions bought and sold at various times, gets tricky
+        for currency in profit_queries:
+            print(currency)
+            r = requests.get(API_URL + 'accounts/%s/transactions' % (currency), auth=self.auth)
+            data = r.json()['data']
+            local_net = 0 # currency profit
+            for transaction in data:
+                if transaction['type'] == 'sell' and transaction['status'] == 'completed':
+                    local_net += float(transaction['native_amount']['amount']) * -1
+                if transaction['type'] == 'buy' and transaction['status'] == 'completed':
+                    local_net -= float(transaction['native_amount']['amount'])
+            global_net += local_net
+            print('Net Profit: %s %s' % (round(local_net, 2), self.native_currency))
+            print()
+        if len(profit_queries) > 1:
+            print('Total Profit: %s %s' % (round(global_net, 2), self.native_currency))
+            print()
 
     def displayBalance(self):
-        return 1
+        return 
 
     def queryTitlePrinter(self, str):
         print('============================')
