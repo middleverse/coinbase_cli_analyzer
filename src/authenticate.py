@@ -8,15 +8,24 @@
 import json, hmac, hashlib, time, requests, sys
 from requests.auth import AuthBase
 
-API_KEY = ''
-API_SECRET = ''
+API_KEY = None
+API_SECRET = None
 API_URL = 'https://api.coinbase.com/v2/'
 
 def load_environment_variables():
-    # # API_KEY = input('Enter API KEY: ')
-    # print(API_KEY)
-    # # API_SECRET = input('Enter API SECRET: ')
-    # print(API_SECRET)
+    global API_KEY, API_SECRET
+    water = open('water.txt', 'r')
+    for l in water:
+        if 'API KEY:' in l.upper():
+            API_KEY = str(l[9:]).rstrip()
+        elif 'API SECRET:' in l.upper():
+            API_SECRET = str(l[12:]).rstrip()
+    
+    print(API_KEY)
+    print(API_SECRET)
+    if API_KEY == None or API_SECRET == None:
+        print('API Login credentials are empty, check creds.')
+    water.close()
     print('Authenticating...')
     
 # custom authentication for Coinbase API
@@ -65,7 +74,7 @@ def authenticate():
 
     # print user name and email    
     data = r.json()['data']
-    print('Authentication successful.\n')
+    print('Authentication successful. Logged into Coinbase.\n')
     print("User Name: %s\n" % data['name'])
     print("User Email: %s\n" % data['email'])
     print("Check README for usage instructions. Type \"q\" to end session.\n") 
