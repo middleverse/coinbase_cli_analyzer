@@ -21,8 +21,6 @@ def load_environment_variables():
         elif 'API SECRET:' in l.upper():
             API_SECRET = str(l[12:]).rstrip()
     
-    print(API_KEY)
-    print(API_SECRET)
     if API_KEY == None or API_SECRET == None:
         print('API Login credentials are empty, check creds.')
     water.close()
