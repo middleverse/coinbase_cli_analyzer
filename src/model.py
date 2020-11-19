@@ -28,8 +28,6 @@ class AccountModel():
         self.currencies_previously_held = {}
         self.query_currencies = []
         self.native_currency = ''
-        self.isUSD = False
-        self.isPCT = False
         self.buildModel()
         
     def buildModel(self):
@@ -100,9 +98,9 @@ class AccountModel():
     def displaySpotPrice(self):
         self.queryTitlePrinter('CURRENT PRICE FOR 1 UNIT OF:')
         for currency in self.query_currencies:
-            r = requests.get(API_URL + 'prices/%s-usd/spot' % (currency), auth=self.auth)
+            r = requests.get(API_URL + 'prices/%s-cad/spot' % (currency), auth=self.auth)
             data = r.json()['data']
-            print('%s: %s USD' % (currency, data['amount']))
+            print('%s: %s %s' % (currency, data['amount'], self.native_currency))
             print()
 
     def displayTransactions(self):
