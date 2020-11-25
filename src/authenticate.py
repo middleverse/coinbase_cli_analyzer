@@ -73,7 +73,6 @@ def authenticate():
     # print user name and email    
     data = r.json()['data']
     print('Authentication successful. Logged into Coinbase.\n')
-    print("User Name: %s\n" % data['name'])
-    print("User Email: %s\n" % data['email'])
-    print("Check README for usage instructions. Type \"q\" to end session.\n") 
+    print(">> User Name: %s\n" % data['name'])
+    print(">> User Email: %s\n" % data['email'])
     return auth

@@ -47,7 +47,8 @@ class AccountModel():
         r = requests.get(API_URL + 'user', auth=self.auth)
         data = r.json()['data']
         self.native_currency = data['native_currency']
-        print('User data loaded.')
+        print('Building model.. Done.')
+        print()
     
     def displayStats(self, args):
         # 3 types of primary requests
@@ -103,7 +104,7 @@ class AccountModel():
         for currency in self.query_currencies:
             r = requests.get(API_URL + 'prices/%s-cad/spot' % (currency), auth=self.auth)
             data = r.json()['data']
-            print('%s: %s %s' % (currency, data['amount'], self.native_currency))
+            print('%s: %s %s' % (currency, round(float(data['amount']), 2), self.native_currency))
             print()
 
     def displayTransactions(self):
@@ -206,9 +207,9 @@ class AccountModel():
                 print(currency)
                 print('Balance: %s %s' % (round(local_balance, 2), self.native_currency))
                 print()
-        if len(self.query_currencies) > 1:
-            print('Account Balance: %s %s' % (round(global_balance, 2), self.native_currency))
-            print()
+        # if len(self.query_currencies) > 1:
+        print('Account Balance: %s %s' % (round(global_balance, 2), self.native_currency))
+        print()
 
 
         

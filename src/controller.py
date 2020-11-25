@@ -17,6 +17,7 @@ def controller():
     # initiate user input
     command = ''
     while(command.upper() not in EXIT_MARKERS):
+        print('>>> Enter (q) or (quit) to exit program. Read README file for usage instructions <<<\n')
         command = input('> ') or 'EMPTY_STRING'
         print()
         args = []
@@ -36,7 +37,7 @@ def controller():
         # all other inputs (checked for validity later) 
         else:
             m.displayStats(args)   
-        print()   
+           
 
 def main():
     controller()
