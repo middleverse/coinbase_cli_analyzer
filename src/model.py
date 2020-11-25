@@ -38,11 +38,11 @@ class AccountModel():
         # iterate through json to build currency hashtables {'name':'id'}
         for acc in data:
             if acc['updated_at'] != None: # if currency owned at any time
-                self.currencies_all[acc['currency']['code']] = None
+                self.currencies_all[acc['currency']['code']] = acc['id']
                 if float(acc['balance']['amount']) > 0: # if currency owned currently
-                    self.currencies_current[acc['currency']['code']] = None
+                    self.currencies_current[acc['currency']['code']] = acc['id']
                 else: # currency previously held
-                    self.currencies_previously_held[acc['currency']['code']] = None
+                    self.currencies_previously_held[acc['currency']['code']] = acc['id']
 
         r = requests.get(API_URL + 'user', auth=self.auth)
         data = r.json()['data']
@@ -85,7 +85,10 @@ class AccountModel():
             else:
                 self.displayProfit()
         elif args[1] == 'BALANCE':
-            self.displayBalance()
+            if args[0] == 'ALL' or args[0] in self.currencies_previously_held:
+                print('Profits can only be displayed for currently held currencies!')
+            else:
+                self.displayBalance()
         else: # TODO: move this to controller
             print('No query (second argument) provided for currency, please provide a valid argument.')
 
@@ -186,7 +189,30 @@ class AccountModel():
             print()
 
     def displayBalance(self):
-        return 
+        self.queryTitlePrinter('BALANCE: ')
+        balance_queries = []
+        global_balance = 0
+        for currency in self.query_currencies:
+            
+            r = requests.get(API_URL + 'accounts/%s/transactions' % (currency), auth=self.auth)
+            data = r.json()['data']
+            local_balance = 0 # currency profit
+            for transaction in data:
+                if transaction['type'] == 'sell' and transaction['status'] == 'completed':
+                    local_balance -= float(transaction['native_amount']['amount']) * -1
+                if transaction['type'] == 'buy' and transaction['status'] == 'completed':
+                    local_balance += float(transaction['native_amount']['amount'])
+            global_balance += local_balance
+            if len(self.query_currencies) == 1:
+                print(currency)
+                print('Balance: %s %s' % (round(local_balance, 2), self.native_currency))
+                print()
+        if len(self.query_currencies) > 1:
+            print('Account Balance: %s %s' % (round(global_balance, 2), self.native_currency))
+            print()
+
+
+        
 
     def queryTitlePrinter(self, str):
         print('============================')
