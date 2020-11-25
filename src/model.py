@@ -190,7 +190,6 @@ class AccountModel():
 
     def displayBalance(self):
         self.queryTitlePrinter('BALANCE: ')
-        balance_queries = []
         global_balance = 0
         for currency in self.query_currencies:
             
